@@ -1,5 +1,31 @@
+
+const jwt  = require('jsonwebtoken');
+const { JWT_SECRET } = require('../../config');
+
+const User = require('../users/users-model');
+
 module.exports = (req, res, next) => {
-  next();
+  const token = req.headers.authorization;
+  if(token) {
+    jwt.verify(token, JWT_SECRET, (err, decodedJwt) => {
+      if(err) {
+        next({ status: 401, message: "token required" });
+      } else {
+        User.findById(decodedJwt.subject)
+          .then(user => {
+            if(user.logged_out_time > decodedJwt.iat) {
+              next({ status: 401, message: "token invalid" });
+            } else {
+              console.log(decodedJwt);
+              req.decodedJwt = decodedJwt;
+              next();
+            }
+          });
+      }
+    })
+  } else {
+    next({ status: 401, message: 'this endpoint is restricted!' });
+  }
   /*
     IMPLEMENT
 
