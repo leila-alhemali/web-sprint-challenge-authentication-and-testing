@@ -47,3 +47,12 @@ test('[POST] /login returns token', async () => {
   const login = await request(server).post('/api/auth/login').send({username: "leila", password: "nunya"})
   expect(login.body).toHaveProperty('token')
 })
+
+test('[GET] /jokes requires authenticated access', async () => {
+  const res = await request(server).post('/api/jokes')
+  expect(res.status).toBe(401)
+})
+
+test('[GET] /jokes returns jokes to logged in user', async () => {
+  
+})
